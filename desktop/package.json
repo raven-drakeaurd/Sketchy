@@ -1,0 +1,8 @@
+{
+  "name": "sketchy",
+  "productName": "Sketchy",
+  "version": "1.0.0",
+  "description": "A push/pull 3D modeler in the style of SketchUp 2017",
+  "main": "main.js",
+  "license": "MIT"
+}

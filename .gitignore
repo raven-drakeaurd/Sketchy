@@ -1,0 +1,5 @@
+# Build output (recreate with ./package.sh)
+dist/
+release/
+node_modules/
+*.log
