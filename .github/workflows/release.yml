@@ -1,0 +1,47 @@
+# Builds every release file and attaches it to a GitHub release.
+# Runs when a release is published on GitHub (Releases > Draft a new release > Publish),
+# or by hand from the Actions tab (files are then kept as a downloadable artifact).
+name: Release files
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Download the Electron runtime for Windows (checksum-verified)
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/electron-win.zip" \
+            https://github.com/electron/electron/releases/download/v33.2.1/electron-v33.2.1-win32-x64.zip
+          echo "c325a6d905c67107e166267813ea2151ae7fd316c0a88de0081db0b9851a9946  $RUNNER_TEMP/electron-win.zip" | sha256sum -c -
+
+      - name: Install the .exe icon tool
+        run: npm install --no-save --prefix "$RUNNER_TEMP/tools" resedit@2.0.3 pe-library@2.0.3
+
+      - name: Build
+        run: ELECTRON_WIN_ZIP="$RUNNER_TEMP/electron-win.zip" NODE_PATH="$RUNNER_TEMP/tools/node_modules" ./package.sh
+
+      - name: Attach the files to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" release/* --clobber
+
+      - name: Keep the files (manual runs)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sketchy-release
+          path: release/
