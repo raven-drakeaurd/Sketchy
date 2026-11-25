@@ -52,6 +52,18 @@ node build.mjs
 npx electron@33.2.1 dist/app
 ```
 
+## Releases
+
+Download the latest version from the [Releases page](https://github.com/raven-drakeaurd/Sketchy/releases).
+Publishing a release on GitHub runs the **Release files** workflow, which builds and attaches
+the Windows installer, the portable Windows app, the Linux installer and the offline HTML.
+
+## Making changes
+
+Changes go through pull requests: one branch per change, a pull request against `main`,
+and a merge once the change is tested. The **Build check** workflow builds every pull request
+and keeps the built files as a downloadable artifact on the run's page.
+
 ## Licenses
 
 three.js and polygon-clipping are MIT licensed; their license files are in `vendor/`. Electron is MIT licensed.

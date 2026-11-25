@@ -1,0 +1,34 @@
+# Checks every pull request: the app must parse and build, and the built files
+# are kept as a downloadable artifact so a branch can be tested before merging.
+name: Build check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check that the scripts parse
+        run: |
+          node --check desktop/main.js
+          node --check desktop/preload.js
+          node -e "const s=require('fs').readFileSync('index.html','utf8');new Function(s.split('<script>').pop().split('</script>')[0]);console.log('index.html script parses')"
+          bash -n package.sh installers/linux/install.sh installers/linux/uninstall.sh
+
+      - name: Build
+        run: ./package.sh
+
+      - name: Keep the built files for testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: sketchy-${{ github.event.pull_request.head.ref || github.ref_name }}
+          path: release/
